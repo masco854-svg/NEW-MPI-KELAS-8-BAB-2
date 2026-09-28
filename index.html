@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Petualangan Pedoman Negaraku - Game Edukasi UUD NRI 1945</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Poppins', sans-serif;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #dc2626;
+            border-radius: 4px;
+        }
+
+        /* Snake & Ladder Grid */
+        .snakes-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+        }
+
+        /* Keyframe Animations */
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 2s infinite ease-in-out;
+        }
+
+        @keyframes bounce-short {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-bounce-short {
+            animation: bounce-short 1s infinite;
+        }
+
+        @keyframes pop-in {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop-in {
+            animation: pop-in 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Card Flip Styling */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .preserve-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex flex-col h-screen overflow-hidden select-none">
+
+    <!-- TOP HEADER / STATUS BAR -->
+    <header class="bg-gradient-to-r from-red-700 via-red-600 to-red-800 text-white p-3 shadow-md flex justify-between items-center z-20 shrink-0 border-b border-red-500/30">
+        <div class="flex items-center space-x-2.5">
+            <div id="player-avatar" class="w-10 h-10 rounded-full bg-amber-400 border-2 border-white flex items-center justify-center font-extrabold text-xl text-red-950 shadow-sm cursor-pointer hover:scale-105 transition" onclick="switchTab('profile')">
+                🇮🇩
+            </div>
+            <div>
+                <div class="flex items-center space-x-1.5">
+                    <h1 id="player-name" class="font-extrabold text-xs sm:text-sm leading-tight max-w-[120px] sm:max-w-[180px] truncate">Penjelajah Muda</h1>
+                    <button onclick="editPlayerNamePrompt()" class="text-[10px] text-amber-200 hover:text-white bg-red-800/60 p-1 rounded"><i class="fas fa-pencil-alt"></i></button>
+                </div>
+                <p id="player-title" class="text-[10px] sm:text-xs text-amber-300 font-semibold truncate max-w-[150px] sm:max-w-[200px]">Lvl 1: Penjelajah Konstitusi</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <div class="bg-red-950/70 border border-amber-400/50 px-3 py-1 rounded-full text-xs font-bold text-amber-300 flex items-center shadow-inner">
+                ⭐ <span id="player-xp" class="ml-1 text-white font-extrabold">0</span> <span class="text-[10px] ml-0.5 text-amber-300">XP</span>
+            </div>
+            <button onclick="toggleSound()" id="sound-btn" class="w-8 h-8 bg-red-800/80 hover:bg-red-900 rounded-full flex items-center justify-center text-xs text-amber-200 border border-red-500 shadow active:scale-95 transition">
+                <i class="fas fa-volume-up"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN APP VIEW CONTAINER (Dynamic Tab Views) -->
+    <main id="app-container" class="flex-1 overflow-y-auto p-3 sm:p-5 pb-24 relative bg-slate-50">
+        <!-- Views loaded dynamically via JS -->
+    </main>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around items-center p-1.5 sm:p-2 z-30 shadow-lg">
+        <button onclick="switchTab('map')" id="nav-map" class="nav-btn flex flex-col items-center text-red-600 focus:outline-none py-1 px-3 rounded-xl transition">
+            <i class="fas fa-map-marked-alt text-lg sm:text-xl"></i>
+            <span class="text-[10px] sm:text-xs font-bold mt-0.5">Peta</span>
+        </button>
+        <button onclick="switchTab('games')" id="nav-games" class="nav-btn flex flex-col items-center text-slate-400 hover:text-red-600 focus:outline-none py-1 px-3 rounded-xl transition">
+            <i class="fas fa-gamepad text-lg sm:text-xl"></i>
+            <span class="text-[10px] sm:text-xs font-bold mt-0.5">Game</span>
+        </button>
+        <button onclick="switchTab('material')" id="nav-material" class="nav-btn flex flex-col items-center text-slate-400 hover:text-red-600 focus:outline-none py-1 px-3 rounded-xl transition">
+            <i class="fas fa-book-open text-lg sm:text-xl"></i>
+            <span class="text-[10px] sm:text-xs font-bold mt-0.5">Materi</span>
+        </button>
+        <button onclick="switchTab('achievements')" id="nav-achievements" class="nav-btn flex flex-col items-center text-slate-400 hover:text-red-600 focus:outline-none py-1 px-3 rounded-xl transition">
+            <i class="fas fa-trophy text-lg sm:text-xl"></i>
+            <span class="text-[10px] sm:text-xs font-bold mt-0.5">Prestasi</span>
+        </button>
+        <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn flex flex-col items-center text-slate-400 hover:text-red-600 focus:outline-none py-1 px-3 rounded-xl transition">
+            <i class="fas fa-user-cog text-lg sm:text-xl"></i>
+            <span class="text-[10px] sm:text-xs font-bold mt-0.5">Profil/Guru</span>
+        </button>
+    </nav>
+
+    <!-- FULLSCREEN MODAL FOR MINI-GAMES -->
+    <div id="game-modal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex flex-col p-2 sm:p-4 backdrop-blur-sm overflow-hidden">
+        <div class="bg-white rounded-2xl flex-1 flex flex-col overflow-hidden shadow-2xl border border-red-200 animate-pop-in max-w-lg mx-auto w-full">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-red-700 to-red-800 text-white p-3 px-4 flex justify-between items-center shrink-0">
+                <div class="flex items-center space-x-2">
+                    <span id="game-modal-icon" class="text-xl">🎮</span>
+                    <h2 id="game-modal-title" class="font-bold text-xs sm:text-sm leading-tight truncate max-w-[220px]">Mini Game</h2>
+                </div>
+                <button onclick="closeGameModal()" class="w-8 h-8 rounded-full bg-red-900/60 hover:bg-red-950 flex items-center justify-center text-white text-sm focus:outline-none active:scale-95">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <!-- Modal Game Content Body -->
+            <div id="game-modal-body" class="flex-1 overflow-y-auto p-3 sm:p-5 bg-slate-50 relative flex flex-col">
+                <!-- Game engine injects screen here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM DIALOG / NOTIFICATION OVERLAY (Replacing Native alert/confirm) -->
+    <div id="custom-dialog-overlay" class="fixed inset-0 bg-slate-900/70 z-50 hidden flex items-center justify-center p-4 backdrop-blur-xs">
+        <div class="bg-white rounded-2xl p-5 max-w-xs w-full shadow-2xl border-2 border-red-500 text-center animate-pop-in space-y-3">
+            <div id="dialog-icon" class="text-4xl">💡</div>
+            <h3 id="dialog-title" class="font-extrabold text-sm text-slate-800">Informasi</h3>
+            <div id="dialog-message" class="text-xs text-slate-600 leading-relaxed max-h-48 overflow-y-auto">Pesan dialog</div>
+            <div id="dialog-buttons" class="pt-2 flex justify-center space-x-2">
+                <!-- Buttons injected dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIO SYNTHESIZER (WEB AUDIO API) -->
+    <script>
+        const AudioEngine = {
+            ctx: null,
+            enabled: true,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playClick() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.08);
+            },
+            playCorrect() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); // C5
+                osc.frequency.setValueAtTime(659.25, this.ctx.currentTime + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, this.ctx.currentTime + 0.2); // G5
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.4);
+            },
+            playWrong() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, this.ctx.currentTime); // A3
+                osc.frequency.setValueAtTime(164.81, this.ctx.currentTime + 0.15); // E3
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.35);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.35);
+            },
+            playDice() {
+                if (!this.enabled) return;
+                this.init();
+                for (let i = 0; i < 4; i++) {
+                    setTimeout(() => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(300 + Math.random() * 200, this.ctx.currentTime);
+                        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start();
+                        osc.stop(this.ctx.currentTime + 0.05);
+                    }, i * 60);
+                }
+            },
+            playFanfare() {
+                if (!this.enabled) return;
+                this.init();
+                const notes = [440, 554.37, 659.25, 880];
+                notes.forEach((freq, idx) => {
+                    setTimeout(() => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start();
+                        osc.stop(this.ctx.currentTime + 0.3);
+                    }, idx * 100);
+                });
+            }
+        };
+
+        function toggleSound() {
+            AudioEngine.enabled = !AudioEngine.enabled;
+            const btn = document.getElementById('sound-btn');
+            btn.innerHTML = AudioEngine.enabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute text-red-300"></i>';
+        }
+    </script>
+
+    <!-- CUSTOM DIALOG ENGINE (NO NATIVE ALERT/CONFIRM) -->
+    <script>
+        function showCustomAlert(title, message, icon = '💡', callback = null) {
+            AudioEngine.playClick();
+            document.getElementById('dialog-icon').innerText = icon;
+            document.getElementById('dialog-title').innerText = title;
+            document.getElementById('dialog-message').innerHTML = message;
+            
+            const btnBox = document.getElementById('dialog-buttons');
+            btnBox.innerHTML = `
+                <button onclick="closeCustomDialog(${callback ? 'true' : 'false'})" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow active:scale-95 transition">
+                    Mengerti
+                </button>
+            `;
+            
+            window._dialogCallback = callback;
+            document.getElementById('custom-dialog-overlay').classList.remove('hidden');
+        }
+
+        function showCustomConfirm(title, message, onConfirm) {
+            AudioEngine.playClick();
+            document.getElementById('dialog-icon').innerText = '❓';
+            document.getElementById('dialog-title').innerText = title;
+            document.getElementById('dialog-message').innerHTML = message;
+            
+            const btnBox = document.getElementById('dialog-buttons');
+            btnBox.innerHTML = `
+                <button onclick="closeCustomDialog(false)" class="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl">
+                    Batal
+                </button>
+                <button onclick="confirmCustomDialog()" class="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow">
+                    Ya, Lanjutkan
+                </button>
+            `;
+            
+            window._confirmCallback = onConfirm;
+            document.getElementById('custom-dialog-overlay').classList.remove('hidden');
+        }
+
+        function closeCustomDialog(triggerCallback = false) {
+            document.getElementById('custom-dialog-overlay').classList.add('hidden');
+            if (triggerCallback && window._dialogCallback) {
+                const cb = window._dialogCallback;
+                window._dialogCallback = null;
+                cb();
+            }
+        }
+
+        function confirmCustomDialog() {
+            document.getElementById('custom-dialog-overlay').classList.add('hidden');
+            if (window._confirmCallback) {
+                const cb = window._confirmCallback;
+                window._confirmCallback = null;
+                cb();
+            }
+        }
+    </script>
+
+    <!-- GAME DATA & BANK SOAL COMPREHENSIVE -->
+    <script>
+        const BANK_SOAL = [
+            // LEVEL 1: GERBANG KONSTITUSI
+            { id: 101, level: 1, kategori: "KONSTITUSI", jenis: "PG", hots: false,
+              soal: "Apakah yang dimaksud dengan Konstitusi?",
+              pilihan: ["Hukum dasar yang menjadi pedoman penyelenggaraan negara", "Kumpulan hukum pidana untuk menghukum kejahatan", "Peraturan sekolah yang dibuat oleh guru", "Dokumen perjanjian perdagangan internasional"],
+              jawaban: 0, penjelasan: "Konstitusi adalah hukum dasar tertulis maupun tidak tertulis yang menjadi landasan utama penyelenggaraan suatu negara." },
+            { id: 102, level: 1, kategori: "KONSTITUSI", jenis: "BS", hots: false,
+              soal: "Tata tertib di sekolah merupakan contoh aturan yang melatih ketaatan kita terhadap norma sebelum memahami konstitusi negara.",
+              jawaban: true, penjelasan: "Benar! Tata tertib sekolah mengajarkan disiplin norma hukum dasar yang kelak diterapkan sebagai warga negara." },
+            { id: 103, level: 1, kategori: "KONSTITUSI", jenis: "HOTS", hots: true,
+              soal: "Di sebuah desa, warga menolak aturan ronda malam karena merasa kebebasannya dibatasi. Menurut prinsip konstitusi, pernyataan manakah yang paling tepat?",
+              pilihan: ["Aturan ronda malam harus dihapus total agar warga bebas", "Aturan diperlukan untuk menjamin ketertiban dan perlindungan hak bersama", "Warga yang menolak harus diusir dari desa secara paksa", "Kepala desa bebas memberi hukuman tanpa musyawarah"],
+              jawaban: 1, penjelasan: "Konstitusi dan aturan dibuat bukan untuk membatasi kebebasan, melainkan menciptakan ketertiban agar hak setiap orang terlindungi." },
+            
+            // LEVEL 2: JEJAK SEJARAH UUD
+            { id: 201, level: 2, kategori: "BPUPK", jenis: "PG", hots: false,
+              soal: "Badan yang dibentuk pada 1 Maret 1945 untuk menyelidiki usaha-usaha persiapan kemerdekaan Indonesia adalah...",
+              pilihan: ["PPKI", "BPUPK", "Panitia Sembilan", "KNIP"],
+              jawaban: 1, penjelasan: "BPUPK (Badan Penyelidik Usaha-Usaha Persiapan Kemerdekaan) dibentuk untuk merumuskan dasar negara dan rancangan UUD." },
+            { id: 202, level: 2, kategori: "BPUPK", jenis: "TOKOH", hots: false,
+              soal: "Siapakah Ketua BPUPK yang memimpin sidang perumusan dasar negara dan UUD?",
+              pilihan: ["Ir. Soekarno", "Dr. K.R.T. Radjiman Wedyodiningrat", "Drs. Moh. Hatta", "Mr. Soepomo"],
+              jawaban: 1, penjelasan: "Dr. K.R.T. Radjiman Wedyodiningrat adalah Ketua BPUPK yang memimpin jalannya sidang-sidang BPUPK." },
+            { id: 203, level: 2, kategori: "BPUPK", jenis: "HOTS", hots: true,
+              soal: "Dalam sidang BPUPK, para tokoh pendiri bangsa saling berbeda pendapat mengenai rancangan dasar negara. Sikap keteladanan yang dapat kita contoh adalah...",
+              pilihan: ["Menolak menghadiri sidang jika pendapatnya tidak diterima", "Mengutamakan musyawarah dan saling menghargai perbedaan pandangan", "Saling memusuhi antar anggota sidang", "Mengikuti pendapat yang paling keras bersuara"],
+              jawaban: 1, penjelasan: "Pendiri bangsa mengedepankan jiwa besar, musyawarah, dan saling menghormati demi cita-cita kemerdekaan bersama." },
+
+            // LEVEL 3: PULAU PANITIA SEMBILAN
+            { id: 301, level: 3, kategori: "PANITIA_SEMBILAN", jenis: "PG", hots: false,
+              soal: "Panitia Sembilan dibentuk oleh BPUPK pada tanggal 22 Juni 1945 untuk merumuskan...",
+              pilihan: ["Piagam Jakarta (Jakarta Charter)", "Teks Proklamasi Kemerdekaan", "UUD 1945 Batang Tubuh", "Lagu Bangun Pemudi Pemuda"],
+              jawaban: 0, penjelasan: "Panitia Sembilan berhasil merumuskan rancangan Pembukaan UUD yang dikenal sebagai Piagam Jakarta." },
+            { id: 302, level: 3, kategori: "PANITIA_SEMBILAN", jenis: "BS", hots: false,
+              soal: "Ir. Soekarno menjabat sebagai Ketua Panitia Sembilan yang merumuskan Piagam Jakarta.",
+              jawaban: true, penjelasan: "Benar! Ir. Soekarno memimpin Panitia Sembilan bersama 8 tokoh perumus nasional lainnya." },
+            { id: 303, level: 3, kategori: "PIAGAM_JAKARTA", jenis: "HOTS", hots: true,
+              soal: "Perubahan kalimat sila pertama pada Piagam Jakarta menjadi 'Ketuhanan Yang Maha Esa' disepakati demi...",
+              pilihan: ["Mempercepat waktu sidang PPKI", "Menjaga persatuan dan kesatuan bangsa Indonesia dari sabang sampai merauke", "Menyenangkan pemerintah Jepang", "Memenuhi keinginan kelompok tertentu"],
+              jawaban: 1, penjelasan: "Perubahan dilakukan demi menjaga persatuan bangsa Indonesia yang beraneka ragam suku dan agama." },
+
+            // LEVEL 4: KOTA PPKI
+            { id: 401, level: 4, kategori: "PPKI", jenis: "PG", hots: false,
+              soal: "Sidang PPKI mengesahkan UUD NRI Tahun 1945 sebagai konstitusi tertulis Indonesia pada tanggal...",
+              pilihan: ["17 Agustus 1945", "18 Agustus 1945", "19 Agustus 1945", "22 Juni 1945"],
+              jawaban: 1, penjelasan: "UUD NRI Tahun 1945 disahkan oleh PPKI pada tanggal 18 Agustus 1945, sehari setelah proklamasi." },
+            { id: 402, level: 4, kategori: "PPKI", jenis: "TOKOH", hots: false,
+              soal: "Tokoh yang dipilih oleh PPKI menjadi Presiden dan Wakil Presiden pertama Republik Indonesia pada 18 Agustus 1945 adalah...",
+              pilihan: ["Ir. Soekarno dan Drs. Moh. Hatta", "Mr. Soepomo dan Mr. Muhammad Yamin", "K.H. A. Wahid Hasjim dan Ki Bagus Hadikusumo", "Sutan Sjahrir dan Tan Malaka"],
+              jawaban: 0, penjelasan: "Sidang PPKI 18 Agustus 1945 menetapkan Ir. Soekarno sebagai Presiden dan Drs. Moh. Hatta sebagai Wakil Presiden." },
+
+            // LEVEL 5: KERAJAAN KONSTITUSI
+            { id: 501, level: 5, kategori: "FUNGSI_UUD", jenis: "PG", hots: false,
+              soal: "Sebagai 'Hukum Dasar Tertinggi', kedudukan UUD NRI Tahun 1945 mengimplikasikan bahwa...",
+              pilihan: ["Peraturan di bawahnya tidak boleh bertentangan dengan UUD 1945", "UUD 1945 boleh diubah oleh siapa saja setiap hari", "Peraturan daerah memiliki tingkatan lebih tinggi dari UUD 1945", "UUD 1945 hanya berlaku untuk pejabat pemerintah"],
+              jawaban: 0, penjelasan: "UUD NRI 1945 berada di puncaknya tata urutan perundang-undangan; hukum di bawahnya tidak boleh bertentangan dengannya." },
+            { id: 502, level: 5, kategori: "FUNGSI_UUD", jenis: "PG", hots: false,
+              soal: "Manakah yang merupakan fungsi utama UUD NRI Tahun 1945?",
+              pilihan: ["Alat pengendali, penentu, dan pembatas kekuasaan negara", "Buku petunjuk perdagangan internasional", "Buku pedoman ujian sekolah", "Aturan hukuman bagi warga asing"],
+              jawaban: 0, penjelasan: "UUD 1945 berfungsi mengatur dan membatasi kekuasaan penguasa agar tidak bertindak sewenang-wenang terhadap rakyat." },
+
+            // LEVEL 6 & 7: MASYARAKAT TAAT & FINAL
+            { id: 601, level: 6, kategori: "PENERAPAN", jenis: "PG", hots: false,
+              soal: "Contoh penerapan ketaatan terhadap aturan di lingkungan sekolah adalah...",
+              pilihan: ["Mengikuti upacara bendera dengan khidmat dan tepat waktu", "Datang ke sekolah saat jam pelajaran hampir selesai", "Membuang sampah ke kolong meja kelas", "Menolak piket kebersihan kelas"],
+              jawaban: 0, penjelasan: "Mengikuti upacara bendera dengan disiplin merupakan wujud ketaatan aturan tata tertib sekolah dan jiwa nasionalisme." },
+            { id: 602, level: 6, kategori: "PENERAPAN", jenis: "HOTS", hots: true,
+              soal: "Andi menemukan temannya menyebarkan berita bohong (hoaks) di media sosial yang memicu perpecahan. Tindakan Andi sesuai nilai Pasal 28J UUD 1945 adalah...",
+              pilihan: ["Ikut menyebarkan berita bohong tersebut", "Mengingatkan teman secara santun dan memverifikasi kebenaran informasi", "Memusuhi teman dan membalas dengan ujaran kebencian", "Membiarkan karena merasa bukan urusannya"],
+              jawaban: 1, penjelasan: "Menegur dengan santun dan memverifikasi informasi mencerminkan tanggung jawab menggunakan media sosial sesuai konstitusi." },
+            { id: 701, level: 7, kategori: "FINAL", jenis: "HOTS", hots: true,
+              soal: "Mengapa konstitusi (UUD NRI Tahun 1945) sangat vital bagi keberlangsungan Negara Kesatuan Republik Indonesia?",
+              pilihan: ["Karena UUD NRI 1945 menjadi pedoman pemersatu dan pelindung hak seluruh warga negara", "Agar Indonesia ditakuti oleh negara lain di dunia", "Hanya sebagai syarat formalitas berdirinya negara", "Agar pemerintah dapat membuat aturan sesuka hati"],
+              jawaban: 0, penjelasan: "UUD 1945 adalah tiang penyangga utama yang menyatukan keberagaman Indonesia serta menjamin hak-hak asasi warga negaranya." }
+        ];
+
+        const LEVEL_CONFIG = [
+            { id: 1, name: "🏫 GERBANG KONSTITUSI", icon: "🏫", minXp: 0, badge: "🏅 Detektif Konstitusi", desc: "Pahami pengertian konstitusi dan pentingnya norma aturan." },
+            { id: 2, name: "🇮🇩 JEJAK SEJARAH UUD", icon: "🇮🇩", minXp: 100, badge: "🏅 Ahli BPUPK", desc: "Jelajahi dinamika perumusan rancangan UUD dalam sidang BPUPK." },
+            { id: 3, name: "📜 PULAU PANITIA SEMBILAN", icon: "📜", minXp: 250, badge: "🏅 Penjaga Piagam Jakarta", desc: "Dalami peranan Panitia Sembilan & peristiwa Piagam Jakarta." },
+            { id: 4, name: "🏛️ KOTA PPKI", icon: "🏛️", minXp: 450, badge: "🏅 Sahabat PPKI", desc: "Saksikan detik-detik pengesahan UUD NRI 1945 pada 18 Agustus 1945." },
+            { id: 5, name: "⚖️ KERAJAAN KONSTITUSI", icon: "⚖️", minXp: 700, badge: "🏅 Master UUD", desc: "Pelajari kedudukan, fungsi, dan sifat-sifat UUD NRI Tahun 1945." },
+            { id: 6, name: "🌳 MASYARAKAT TAAT", icon: "🌳", minXp: 1000, badge: "🏅 Warga Taat Aturan", desc: "Praktikkan ketaatan aturan di keluarga, sekolah, & masyarakat." },
+            { id: 7, name: "🏆 WARGA KONSTITUSIONAL", icon: "🏆", minXp: 1350, badge: "🏆 WARGA NEGARA KONSTITUSIONAL", desc: "Final Mission: Buktikan dirimu sebagai Warga Negara Sejati!" }
+        ];
+
+        const TOKOH_DATA = [
+            { name: "Ir. Soekarno", role: "Ketua Panitia Sembilan & Ketua PPKI", desc: "Memimpin perumusan Piagam Jakarta dan pengesahan UUD 1945.", icon: "👨‍💼" },
+            { name: "Dr. K.R.T. Radjiman", role: "Ketua BPUPK", desc: "Memimpin sidang perumusan dasar negara dan rancangan UUD.", icon: "👴" },
+            { name: "Drs. Moh. Hatta", role: "Wakil Ketua Panitia Sembilan", desc: "Tokoh pemrakarsa penyelarasan sila pertama Piagam Jakarta demi persatuan.", icon: "👓" },
+            { name: "Mr. Soepomo", role: "Ketua Panitia Kecil Perancang UUD", desc: "Arsitek utama susunan pasal-pasal dan paham integralistik negara.", icon: "📜" }
+        ];
+
+        function getQuestionWithOptions(levelId = null) {
+            let pool = levelId ? BANK_SOAL.filter(q => q.level === levelId) : BANK_SOAL;
+            if (!pool.length) pool = BANK_SOAL;
+            const rawQ = pool[Math.floor(Math.random() * pool.length)];
+            if (rawQ.jenis === 'BS' || !rawQ.pilihan) {
+                return {
+                    ...rawQ,
+                    pilihan: ["Benar", "Salah"],
+                    jawaban: rawQ.jawaban === true ? 0 : (rawQ.jawaban === false ? 1 : rawQ.jawaban)
+                };
+            }
+            return rawQ;
+        }
+    </script>
+
+    <!-- STATE MANAGEMENT & PERSISTENCE -->
+    <script>
+        const AppState = {
+            player: {
+                name: localStorage.getItem('p_name') || 'Penjelajah Muda',
+                xp: parseInt(localStorage.getItem('p_xp')) || 0,
+                badges: JSON.parse(localStorage.getItem('p_badges')) || [],
+                reflections: JSON.parse(localStorage.getItem('p_reflections')) || {},
+                roomCode: localStorage.getItem('p_room') || 'PANCASILA45'
+            },
+            currentTab: 'map'
+        };
+
+        function saveState() {
+            localStorage.setItem('p_name', AppState.player.name);
+            localStorage.setItem('p_xp', AppState.player.xp);
+            localStorage.setItem('p_badges', JSON.stringify(AppState.player.badges));
+            localStorage.setItem('p_reflections', JSON.stringify(AppState.player.reflections));
+            localStorage.setItem('p_room', AppState.player.roomCode);
+            updateHeader();
+        }
+
+        function updateHeader() {
+            document.getElementById('player-name').innerText = AppState.player.name;
+            document.getElementById('player-xp').innerText = AppState.player.xp;
+            
+            let currentLvl = LEVEL_CONFIG.slice().reverse().find(l => AppState.player.xp >= l.minXp) || LEVEL_CONFIG[0];
+            document.getElementById('player-title').innerText = `Lvl ${currentLvl.id}: ${currentLvl.name.split(' ')[1] || currentLvl.name}`;
+        }
+
+        function editPlayerNamePrompt() {
+            const htmlInput = `
+                <div class="text-left space-y-2">
+                    <label class="block text-xs font-bold text-slate-700">Nama Panggilan Baru:</label>
+                    <input type="text" id="prompt-name-input" value="${AppState.player.name}" class="w-full border border-slate-300 rounded-xl p-2 text-xs focus:outline-none focus:border-red-500 font-bold">
+                </div>
+            `;
+            showCustomAlert("Ubah Nama Panggilan", htmlInput, "✏️", () => {
+                const newName = document.getElementById('prompt-name-input')?.value;
+                if (newName && newName.trim() !== "") {
+                    AppState.player.name = newName.trim();
+                    saveState();
+                }
+            });
+        }
+
+        function addXP(amount, badgeToUnlock = null) {
+            AppState.player.xp += amount;
+            AudioEngine.playCorrect();
+            saveState();
+
+            if (badgeToUnlock && !AppState.player.badges.includes(badgeToUnlock)) {
+                AppState.player.badges.push(badgeToUnlock);
+                saveState();
+                AudioEngine.playFanfare();
+                setTimeout(() => {
+                    showCustomAlert("LENCANA BARU!", `🎉 Selamat! Kamu berhasil memperoleh Lencana Baru:<br><br><b class="text-amber-600 text-sm">${badgeToUnlock}</b>`, "🏅");
+                }, 300);
+            }
+        }
+
+        function switchTab(tabName) {
+            AudioEngine.playClick();
+            AppState.currentTab = tabName;
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-red-600');
+                btn.classList.add('text-slate-400');
+            });
+            document.getElementById(`nav-${tabName}`).classList.remove('text-slate-400');
+            document.getElementById(`nav-${tabName}`).classList.add('text-red-600');
+
+            const container = document.getElementById('app-container');
+            if (tabName === 'map') renderMapView(container);
+            else if (tabName === 'games') renderGamesView(container);
+            else if (tabName === 'material') renderMaterialView(container);
+            else if (tabName === 'achievements') renderAchievementsView(container);
+            else if (tabName === 'profile') renderProfileView(container);
+        }
+    </script>
+
+    <!-- TAB VIEWS (MAP, GAMES, MATERIAL, ACHIEVEMENTS, PROFILE) -->
+    <script>
+        function renderMapView(container) {
+            let html = `
+                <div class="max-w-md mx-auto space-y-4">
+                    <div class="bg-gradient-to-r from-red-800 via-red-700 to-red-900 text-white p-4 rounded-2xl shadow-lg border border-red-600 flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] text-amber-300 font-extrabold uppercase tracking-wider">Petualangan Utama</span>
+                            <h2 class="text-base sm:text-lg font-black">Peta Konstitusi Digital</h2>
+                            <p class="text-xs text-red-200 mt-0.5">Jelajahi 7 Level untuk meraih Gelar Master!</p>
+                        </div>
+                        <div class="text-3xl animate-bounce-short">🗺️</div>
+                    </div>
+
+                    <div class="relative pl-6 border-l-4 border-red-300 space-y-5 my-4">
+            `;
+
+            LEVEL_CONFIG.forEach((lvl) => {
+                const isUnlocked = AppState.player.xp >= lvl.minXp;
+                const isCompleted = AppState.player.badges.includes(lvl.badge);
+
+                html += `
+                    <div class="relative group">
+                        <div class="absolute -left-[35px] top-2 w-8 h-8 rounded-full border-2 ${isCompleted ? 'bg-amber-400 border-amber-600 text-red-950 font-black' : isUnlocked ? 'bg-red-600 border-white text-white font-extrabold' : 'bg-slate-300 border-slate-400 text-slate-500 font-bold'} flex items-center justify-center text-xs shadow-md">
+                            ${isCompleted ? '✓' : lvl.id}
+                        </div>
+
+                        <div class="bg-white p-3.5 rounded-2xl border-2 ${isUnlocked ? 'border-red-400 shadow-sm' : 'border-slate-200 opacity-60'} transition hover:shadow-md">
+                            <div class="flex items-center space-x-2.5">
+                                <span class="text-2xl sm:text-3xl">${lvl.icon}</span>
+                                <div class="flex-1 overflow-hidden">
+                                    <h3 class="font-extrabold text-xs sm:text-sm ${isUnlocked ? 'text-red-900' : 'text-slate-600'} truncate">${lvl.name}</h3>
+                                    <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-2 leading-tight">${lvl.desc}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+                                <span class="text-[10px] font-extrabold text-amber-600 truncate max-w-[150px]">${lvl.badge}</span>
+                                ${isUnlocked 
+                                    ? `<button onclick="openLevelPlay(${lvl.id})" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow active:scale-95 transition flex items-center space-x-1">
+                                        <span>Mulai</span> <i class="fas fa-arrow-right text-[10px]"></i>
+                                       </button>`
+                                    : `<span class="bg-slate-200 text-slate-600 px-2 py-1 rounded-lg font-extrabold text-[10px]"><i class="fas fa-lock mr-1"></i> ${lvl.minXp} XP</span>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function openLevelPlay(levelId) {
+            const lvl = LEVEL_CONFIG.find(l => l.id === levelId);
+            openGameModal(`${lvl.icon} ${lvl.name}`, (body) => {
+                let html = `
+                    <div class="text-center space-y-3 my-auto py-2">
+                        <div class="text-5xl">${lvl.icon}</div>
+                        <h3 class="text-base font-extrabold text-red-900">${lvl.name}</h3>
+                        <p class="text-xs text-slate-600 max-w-xs mx-auto">${lvl.desc}</p>
+
+                        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3 my-3 text-left space-y-1.5 shadow-sm">
+                            <h4 class="font-extrabold text-xs text-amber-900 flex items-center"><i class="fas fa-bullseye mr-1.5 text-amber-600"></i> Misi Level ${levelId}:</h4>
+                            <ul class="text-[11px] text-amber-800 space-y-1 list-disc list-inside font-medium">
+                                <li>Selesaikan tantangan Mini Game terpilih</li>
+                                <li>Kumpulkan minimal +50 XP di level ini</li>
+                                <li>Raih lencana resmi: <b>${lvl.badge}</b></li>
+                            </ul>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 max-w-xs mx-auto pt-1">
+                            <button onclick="launchMiniGame('detektif', ${levelId})" class="p-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow flex flex-col items-center active:scale-95 transition">
+                                <span class="text-xl mb-1">🔎</span>
+                                Detektif Konstitusi
+                            </button>
+                            <button onclick="launchMiniGame('ular', ${levelId})" class="p-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow flex flex-col items-center active:scale-95 transition">
+                                <span class="text-xl mb-1">🐍</span>
+                                Ular Tangga
+                            </button>
+                        </div>
+
+                        <div class="pt-2">
+                            <button onclick="launchReflectionModal(${levelId})" class="text-xs text-red-700 hover:text-red-900 font-extrabold underline flex items-center justify-center mx-auto">
+                                <i class="fas fa-pen-alt mr-1"></i> Tulis Jurnal Refleksi Level Ini
+                            </button>
+                        </div>
+                    </div>
+                `;
+                body.innerHTML = html;
+            });
+        }
+
+        function renderGamesView(container) {
+            const gamesList = [
+                { id: 'detektif', name: 'Detektif Konstitusi', icon: '🔎', tag: 'Analisis HOTS' },
+                { id: 'ular', name: 'Ular Tangga Digital', icon: '🐍', tag: 'Papan & Dadu' },
+                { id: 'tebak_tokoh', name: 'Tebak Tokoh Sejarah', icon: '👤', tag: 'Identifikasi' },
+                { id: 'pasangkan', name: 'Pasangkan Tokoh & Peran', icon: '🧩', tag: 'Matching' },
+                { id: 'roda', name: 'Roda Keberuntungan', icon: '🎡', tag: 'Spin Wheel' },
+                { id: 'timeline', name: 'Mesin Waktu Sejarah', icon: '⏳', tag: 'Kronologi' },
+                { id: 'benar_salah', name: 'Benar atau Salah', icon: '⚡', tag: 'Speed Challenge' },
+                { id: 'kuis_cepat', name: 'Kuis Time Attack', icon: '⏱️', tag: 'Uji Kecepatan' },
+                { id: 'memory', name: 'Memory Card Match', icon: '🎴', tag: 'Daya Ingat' },
+                { id: 'tts', name: 'TTS Mini Konstitusi', icon: '✏️', tag: 'Kata Kunci' },
+                { id: 'monopoli', name: 'Monopoli Konstitusi', icon: '🎲', tag: 'Properti Rule' },
+                { id: 'simulasi', name: 'Simulasi Warga Taat', icon: '🏛️', tag: 'Studi Kasus' },
+                { id: 'tebak_gambar', name: 'Tebak Gambar Peristiwa', icon: '🖼️', tag: 'Visual Analysis' },
+                { id: 'battle', name: 'Battle Quiz (1 v 1 AI)', icon: '⚔️', tag: 'Mode Duel HP' },
+                { id: 'jelajah', name: 'Jelajah Pasal & Fungsi', icon: '⚖️', tag: 'Klasifikasi' },
+                { id: 'final', name: 'Final Mission & Sertifikat', icon: '🏆', tag: 'Grand Challenge' }
+            ];
+
+            let html = `
+                <div class="max-w-md mx-auto space-y-3">
+                    <div class="text-center py-1">
+                        <h2 class="text-base sm:text-lg font-black text-red-900">🎮 ZONA 16 MINI GAMES</h2>
+                        <p class="text-xs text-slate-600">Pilih mini game favoritmu untuk mengasah wawasan!</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5">
+            `;
+
+            gamesList.forEach(g => {
+                html += `
+                    <div onclick="launchMiniGame('${g.id}', 1)" class="bg-white p-3 rounded-2xl border border-red-100 shadow-sm hover:shadow-md transition active:scale-95 cursor-pointer flex flex-col justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-2xl sm:text-3xl">${g.icon}</span>
+                            <div class="overflow-hidden">
+                                <h3 class="font-bold text-xs text-slate-800 leading-tight truncate">${g.name}</h3>
+                                <span class="inline-block bg-red-50 text-red-700 text-[9px] font-extrabold px-1.5 py-0.5 rounded mt-1">${g.tag}</span>
+                            </div>
+                        </div>
+                        <div class="mt-2.5 text-right border-t border-slate-50 pt-1">
+                            <span class="text-[10px] text-amber-600 font-extrabold">+15-50 XP <i class="fas fa-play ml-0.5"></i></span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function renderMaterialView(container) {
+            const cards = [
+                { title: "📖 APA ITU KONSTITUSI?", icon: "📖", desc: "Konstitusi merupakan hukum dasar tertulis dan tidak tertulis yang menjadi landasan utama dalam mengatur penyelenggaraan pemerintahan suatu negara." },
+                { title: "🇮🇩 UUD NRI TAHUN 1945", icon: "🇮🇩", desc: "Hukum dasar tertulis tertinggi di Republik Indonesia yang disahkan oleh PPKI pada tanggal 18 Agustus 1945." },
+                { title: "🏛️ PROSES PERUMUSAN", icon: "🏛️", desc: "Dirumuskan dalam sidang BPUPK (29 Mei - 17 Juli 1945), diselaraskan oleh Panitia Sembilan (22 Juni 1945), dan disahkan oleh PPKI." },
+                { title: "⚖️ KEDUDUKAN & FUNGSI", icon: "⚖️", desc: "Berfungsi sebagai hukum tertinggi, pengontrol norma hukum di bawahnya, serta pembatas kekuasaan penguasa agar tidak sewenang-wenang." },
+                { title: "🏫 KETAATAN NORMA", icon: "🏫", desc: "Diterapkan mulai dari mematuhi aturan keluarga, tata tertib sekolah, hingga undang-undang di kehidupan bermasyarakat." }
+            ];
+
+            let html = `
+                <div class="max-w-md mx-auto space-y-3">
+                    <div class="text-center py-1">
+                        <h2 class="text-base sm:text-lg font-black text-red-900">📚 MICRO LEARNING INTERAKTIF</h2>
+                        <p class="text-xs text-slate-600">Ketuk kartu di bawah ini untuk membuka penjelasannya!</p>
+                    </div>
+
+                    <div class="space-y-2.5">
+            `;
+
+            cards.forEach((c, idx) => {
+                html += `
+                    <div onclick="flipMaterialCard(${idx})" id="flashcard-${idx}" class="bg-white rounded-2xl p-4 border border-red-200 shadow-sm hover:shadow transition-all duration-300 cursor-pointer">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-3xl">${c.icon}</span>
+                            <div class="flex-1">
+                                <h3 class="font-extrabold text-xs text-red-900">${c.title}</h3>
+                                <p id="card-desc-${idx}" class="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">${c.desc}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function flipMaterialCard(idx) {
+            AudioEngine.playClick();
+            const cardDesc = document.getElementById(`card-desc-${idx}`);
+            cardDesc.classList.toggle('line-clamp-2');
+        }
+
+        function renderAchievementsView(container) {
+            let html = `
+                <div class="max-w-md mx-auto space-y-4">
+                    <div class="bg-gradient-to-r from-amber-500 to-amber-600 text-white p-4 rounded-2xl shadow text-center">
+                        <span class="text-3xl">🏆</span>
+                        <h2 class="text-base sm:text-lg font-black mt-1">PAPAN PRESTASI & LENCANA</h2>
+                        <p class="text-xs text-amber-100">Kumpulkan seluruh lencana untuk menjadi Warga Konstitusional!</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm space-y-3">
+                        <h3 class="font-extrabold text-xs text-slate-700 uppercase tracking-wider flex items-center">
+                            <i class="fas fa-medal text-amber-500 mr-1.5"></i> Koleksi Lencana Diraih:
+                        </h3>
+                        <div class="grid grid-cols-2 gap-2">
+            `;
+
+            LEVEL_CONFIG.forEach(lvl => {
+                const hasBadge = AppState.player.badges.includes(lvl.badge);
+                html += `
+                    <div class="p-2.5 rounded-xl border ${hasBadge ? 'bg-amber-50 border-amber-300 text-amber-950 font-bold' : 'bg-slate-100 border-slate-200 text-slate-400 opacity-60'} flex items-center space-x-2">
+                        <span class="text-xl">${hasBadge ? '🏅' : '🔒'}</span>
+                        <div class="overflow-hidden">
+                            <p class="font-extrabold text-[11px] truncate">${lvl.badge}</p>
+                            <p class="text-[9px] text-slate-500">${hasBadge ? 'Terbuka' : 'Terkunci'}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-red-100 shadow-sm space-y-2">
+                        <h3 class="font-extrabold text-xs text-red-900 flex items-center"><i class="fas fa-book-bookmark text-amber-600 mr-1.5"></i> Catatan Jurnal Refleksi</h3>
+                        <p class="text-xs text-slate-500">Tinjau seluruh hasil refleksi mandiri yang telah kamu tulis.</p>
+                        <button onclick="showReflectionsSummary()" class="w-full py-2.5 bg-red-50 hover:bg-red-100 text-red-700 font-extrabold text-xs rounded-xl border border-red-200 shadow-sm">
+                            Buka Catatan Jurnal
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function renderProfileView(container) {
+            let html = `
+                <div class="max-w-md mx-auto space-y-4">
+                    <div class="bg-white p-4 rounded-2xl border border-red-200 shadow-sm text-center space-y-2">
+                        <div class="w-16 h-16 bg-amber-400 text-red-950 font-black text-3xl rounded-full flex items-center justify-center mx-auto border-4 border-red-100 shadow">
+                            🇮🇩
+                        </div>
+                        <h2 class="font-black text-base text-slate-800">${AppState.player.name}</h2>
+                        <p class="text-xs text-red-600 font-extrabold">Total XP: ${AppState.player.xp} XP</p>
+                        <div class="pt-1">
+                            <button onclick="editPlayerNamePrompt()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-300">
+                                <i class="fas fa-edit mr-1"></i> Ubah Nama
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-red-200 shadow-sm space-y-3">
+                        <h3 class="font-extrabold text-xs text-red-900 uppercase tracking-wider flex items-center">
+                            <i class="fas fa-chalkboard-teacher text-amber-600 mr-1.5"></i> Mode Integrasi Kelas
+                        </h3>
+                        <div>
+                            <label class="block text-xs text-slate-600 mb-1 font-medium">Kode Room Kelas (Dari Guru):</label>
+                            <div class="flex space-x-2">
+                                <input type="text" id="input-room" value="${AppState.player.roomCode}" class="flex-1 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-mono font-bold uppercase focus:outline-none focus:border-red-500">
+                                <button onclick="saveRoomCode()" class="px-3.5 py-1.5 bg-red-600 text-white font-bold text-xs rounded-xl shadow active:scale-95">Simpan</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 text-white p-4 rounded-2xl shadow-md space-y-3">
+                        <h3 class="font-extrabold text-xs text-amber-300 uppercase tracking-wider flex items-center">
+                            <i class="fas fa-user-shield mr-1.5"></i> Panel Guru / Reset
+                        </h3>
+                        <p class="text-xs text-slate-300">Akses ringkasan statistik siswa atau atur ulang data permainan.</p>
+                        <div class="flex space-x-2 pt-1">
+                            <button onclick="showTeacherDashboard()" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs rounded-xl shadow">
+                                Dashboard Guru
+                            </button>
+                            <button onclick="resetGameProgressConfirm()" class="py-2.5 px-3 bg-red-800 hover:bg-red-900 text-white font-bold text-xs rounded-xl">
+                                Reset Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function saveRoomCode() {
+            const val = document.getElementById('input-room').value.trim();
+            if (val) {
+                AppState.player.roomCode = val.toUpperCase();
+                saveState();
+                showCustomAlert("Kode Room Diperbarui", `Kode Room Kelas berhasil disimpan: <b class="font-mono text-red-600">${AppState.player.roomCode}</b>`, "✅");
+            }
+        }
+
+        function resetGameProgressConfirm() {
+            showCustomConfirm("Reset Progres Permainan", "Apakah Anda yakin ingin menghapus seluruh XP dan Lencana yang telah diraih?", () => {
+                AppState.player.xp = 0;
+                AppState.player.badges = [];
+                AppState.player.reflections = {};
+                saveState();
+                switchTab('map');
+            });
+        }
+
+        function showTeacherDashboard() {
+            openGameModal("👨‍🏫 DASHBOARD MONITORING GURU", (body) => {
+                let html = `
+                    <div class="space-y-3 text-xs">
+                        <div class="bg-red-50 border border-red-200 p-3.5 rounded-xl">
+                            <h4 class="font-bold text-red-900 text-xs sm:text-sm">Statistik Belajar Siswa</h4>
+                            <p class="text-slate-600 mt-1">Nama Siswa: <b class="text-slate-900">${AppState.player.name}</b></p>
+                            <p class="text-slate-600">Kode Room: <b class="font-mono text-red-700">${AppState.player.roomCode}</b></p>
+                            <p class="text-slate-600">Total XP Diraih: <b class="text-amber-600">${AppState.player.xp} XP</b></p>
+                            <p class="text-slate-600">Total Lencana: <b>${AppState.player.badges.length} / 7 Lencana</b></p>
+                        </div>
+
+                        <div class="bg-white border border-slate-200 p-3.5 rounded-xl space-y-1.5">
+                            <h4 class="font-bold text-slate-800">Capaian Pembelajaran (PPKn / Civics):</h4>
+                            <ul class="list-disc list-inside space-y-1 text-slate-600 text-[11px]">
+                                <li>Memahami hakikat konstitusi & UUD NRI Tahun 1945</li>
+                                <li>Menganalisis sejarah perumusan (BPUPK & Panitia Sembilan)</li>
+                                <li>Meneladani sikap para tokoh perumus (PPKI)</li>
+                                <li>Menerapkan norma ketaatan di lingkungan sekolah & masyarakat</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                body.innerHTML = html;
+            });
+        }
+    </script>
+
+    <!-- MINI GAME ENGINES (IMPLEMENTING ALL 16 GAMES) -->
+    <script>
+        function openGameModal(title, contentCallback) {
+            AudioEngine.playClick();
+            document.getElementById('game-modal-title').innerText = title;
+            const body = document.getElementById('game-modal-body');
+            body.innerHTML = '';
+            contentCallback(body);
+            document.getElementById('game-modal').classList.remove('hidden');
+        }
+
+        function closeGameModal() {
+            AudioEngine.playClick();
+            document.getElementById('game-modal').classList.add('hidden');
+        }
+
+        function launchMiniGame(gameType, levelId = 1) {
+            if (gameType === 'detektif') runDetektifGame(levelId);
+            else if (gameType === 'ular') runUlarTanggaGame(levelId);
+            else if (gameType === 'tebak_tokoh') runTebakTokohGame(levelId);
+            else if (gameType === 'pasangkan') runPasangkanGame(levelId);
+            else if (gameType === 'roda') runRodaGame(levelId);
+            else if (gameType === 'timeline') runTimelineGame(levelId);
+            else if (gameType === 'benar_salah') runBenarSalahGame(levelId);
+            else if (gameType === 'kuis_cepat') runKuisCepatGame(levelId);
+            else if (gameType === 'memory') runMemoryGame(levelId);
+            else if (gameType === 'tts') runTTSGame(levelId);
+            else if (gameType === 'monopoli') runMonopoliGame(levelId);
+            else if (gameType === 'simulasi') runSimulasiGame(levelId);
+            else if (gameType === 'tebak_gambar') runTebakGambarGame(levelId);
+            else if (gameType === 'battle') runBattleQuizGame(levelId);
+            else if (gameType === 'jelajah') runJelajahPasalGame(levelId);
+            else if (gameType === 'final') runFinalMissionGame(levelId);
+            else runDetektifGame(levelId);
+        }
+
+        // 1. GAME DETEKTIF KONSTITUSI
+        function runDetektifGame(levelId) {
+            const questions = BANK_SOAL.filter(q => q.level === levelId);
+            const q = questions.length > 0 ? questions[Math.floor(Math.random() * questions.length)] : BANK_SOAL[0];
+
+            openGameModal("🔎 DETEKTIF KONSTITUSI", (body) => {
+                let html = `
+                    <div class="space-y-4 my-auto">
+                        <div class="bg-amber-50 border-l-4 border-amber-500 p-3.5 rounded-r-2xl shadow-sm">
+                            <span class="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider">Kategori: ${q.kategori}</span>
+                            <p class="text-xs sm:text-sm text-amber-950 font-bold mt-1 leading-relaxed">${q.soal}</p>
+                        </div>
+
+                        <div class="space-y-2">
+                `;
+
+                q.pilihan.forEach((pil, idx) => {
+                    html += `
+                        <button onclick="checkAnswerDetektif(${idx}, ${q.jawaban}, '${q.penjelasan.replace(/'/g, "\\'")}', ${levelId})" class="w-full text-left p-3 rounded-xl border border-slate-200 bg-white hover:bg-red-50 text-xs font-semibold text-slate-800 transition shadow-sm active:scale-98">
+                            <span class="inline-block w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-center text-[10px] leading-5 mr-2 font-bold">${String.fromCharCode(65 + idx)}</span> ${pil}
+                        </button>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+                body.innerHTML = html;
+            });
+        }
+
+        function checkAnswerDetektif(chosen, correct, explanation, levelId) {
+            if (chosen === correct) {
+                const lvlBadge = LEVEL_CONFIG.find(l => l.id === levelId)?.badge;
+                addXP(25, lvlBadge);
+                showCustomAlert("JAWABAN BENAR!", `🎉 Jawabanmu Tepat! (+25 XP)<br><br><span class="text-slate-600">${explanation}</span>`, "🎯", closeGameModal);
+            } else {
+                AudioEngine.playWrong();
+                showCustomAlert("BELUM TEPAT", `💡 Pembahasan:<br><br><span class="text-slate-600">${explanation}</span>`, "💡");
+            }
+        }
+
+        // 2. GAME ULAR TANGGA DIGITAL
+        let snakePosition = 1;
+        function runUlarTanggaGame(levelId) {
+            openGameModal("🐍 ULAR TANGGA KONSTITUSI", (body) => {
+                renderUlarBoard(body, levelId);
+            });
+        }
+
+        function renderUlarBoard(body, levelId) {
+            let html = `
+                <div class="space-y-3 flex flex-col h-full justify-between">
+                    <div class="text-center">
+                        <p class="text-xs text-slate-600">Jawab kuis untuk memutar dadu dan melangkah!</p>
+                    </div>
+
+                    <div class="snakes-grid my-auto max-w-xs mx-auto border-2 border-red-500 p-1.5 bg-red-100 rounded-2xl shadow-inner">
+            `;
+
+            for (let i = 25; i >= 1; i--) {
+                const isPlayer = (snakePosition === i);
+                html += `
+                    <div class="h-10 bg-white rounded-lg border border-red-200 flex flex-col items-center justify-center relative shadow-xs">
+                        <span class="text-[8px] font-bold text-slate-400 absolute top-0.5 left-1">${i}</span>
+                        ${isPlayer ? '<span class="text-lg animate-bounce-short">🧍</span>' : ''}
+                        ${i === 5 ? '🪜' : i === 12 ? '🐍' : i === 19 ? '🪜' : i === 23 ? '🐍' : ''}
+                    </div>
+                `;
+            }
+
+            html += `
+                    </div>
+
+                    <div class="text-center bg-white p-3 rounded-2xl border border-red-200 shadow-sm">
+                        <p class="text-xs font-bold text-slate-700">Posisi Bidak: Petak ${snakePosition} / 25</p>
+                        <button onclick="rollUlarDice(${levelId})" class="mt-2 w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow active:scale-95 transition">
+                            🎲 Lempar Dadu & Jawab Soal
+                        </button>
+                    </div>
+                </div>
+            `;
+            body.innerHTML = html;
+        }
+
+        function rollUlarDice(levelId) {
+            const q = getQuestionWithOptions(levelId);
+            let optionsHtml = '';
+            q.pilihan.forEach((p, idx) => {
+                optionsHtml += `<button onclick="submitUlarAnswer(${idx}, ${q.jawaban}, ${levelId})" class="w-full text-left p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold my-1">${p}</button>`;
+            });
+
+            showCustomAlert("TANTANGAN DADU", `<p class="text-xs font-bold text-slate-800 mb-2">${q.soal}</p>${optionsHtml}`, "🎲");
+        }
+
+        function submitUlarAnswer(chosen, correct, levelId) {
+            if (chosen === correct) {
+                AudioEngine.playDice();
+                const dice = Math.floor(Math.random() * 4) + 1;
+                snakePosition += dice;
+                if (snakePosition === 12) snakePosition = 6;
+                if (snakePosition === 5) snakePosition = 14;
+                
+                if (snakePosition >= 25) {
+                    snakePosition = 25;
+                    addXP(50);
+                    showCustomAlert("FINISH!", "🏆 Selamat! Bidakmu telah mencapai Garis Finish Ular Tangga! (+50 XP)", "🏆", closeGameModal);
+                } else {
+                    addXP(10);
+                    showCustomAlert("JAWABAN BENAR", `🎉 Jawaban Tepat! Dadu menunjukkan angka <b>${dice}</b>. Bidak maju ke petak ${snakePosition}!`, "🎲", () => {
+                        const body = document.getElementById('game-modal-body');
+                        renderUlarBoard(body, levelId);
+                    });
+                }
+            } else {
+                AudioEngine.playWrong();
+                showCustomAlert("BELUM TEPAT", "❌ Jawaban belum tepat. Dadu tidak dapat diputar!", "💡");
+            }
+        }
+
+        // 3. TEBAK TOKOH SEJARAH
+        function runTebakTokohGame(levelId) {
+            const t = TOKOH_DATA[Math.floor(Math.random() * TOKOH_DATA.length)];
+            openGameModal("👤 TEBAK TOKOH SEJARAH", (body) => {
+                let html = `
+                    <div class="text-center space-y-4 my-auto">
+                        <div class="w-20 h-20 bg-amber-100 text-amber-900 rounded-full flex items-center justify-center text-4xl mx-auto border-2 border-amber-300 shadow">
+                            ${t.icon}
+                        </div>
+                        
+                        <div class="bg-amber-50 p-3.5 rounded-2xl border border-amber-200 text-left">
+                            <h4 class="font-extrabold text-xs text-amber-900 uppercase">Petunjuk Peran Tokoh:</h4>
+                            <p class="text-xs text-amber-950 mt-1 leading-relaxed">"${t.desc}"</p>
+                        </div>
+
+                        <div class="space-y-2 max-w-xs mx-auto">
+                `;
+
+                TOKOH_DATA.forEach(opt => {
+                    html += `
+                        <button onclick="checkTebakTokoh('${opt.name}', '${t.name}')" class="w-full p-2.5 bg-white border border-slate-200 hover:bg-red-50 text-xs font-bold text-slate-800 rounded-xl shadow-xs">
+                            ${opt.name}
+                        </button>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+                body.innerHTML = html;
+            });
+        }
+
+        function checkTebakTokoh(chosen, correct) {
+            if (chosen === correct) {
+                addXP(20);
+                showCustomAlert("TEBAKAN BENAR!", `🎉 Tepat sekali! Tokoh tersebut adalah <b>${correct}</b>. (+20 XP)`, "👤", closeGameModal);
+            } else {
+                AudioEngine.playWrong();
+                showCustomAlert("BELUM TEPAT", "💡 Coba baca kembali petunjuk perannya dengan cermat!", "💡");
+            }
+        }
+
+        // 4. PASANGKAN TOKOH & PERAN
+        let selectedPairTokoh = null;
+        function runPasangkanGame(levelId) {
+            openGameModal("🧩 PASANGKAN TOKOH & PERAN", (body) => {
+                let html = `
+                    <div class="space-y-3 my-auto">
+                        <p class="text-xs text-center text-slate-600">Ketuk Kartu Tokoh (Kiri), lalu ketuk Kartu Peran yang Sesuai (Kanan)!</p>
+                        
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div class="space-y-2">
+                                <h4 class="font-black text-[11px] text-red-900 text-center">TOKOH / BADAN</h4>
+                                <div onclick="selectTokohCard('BPUPK')" class="p-3 bg-white border border-red-200 rounded-xl text-xs font-bold text-center cursor-pointer shadow-xs active:scale-95">BPUPK</div>
+                                <div onclick="selectTokohCard('PANITIA9')" class="p-3 bg-white border border-red-200 rounded-xl text-xs font-bold text-center cursor-pointer shadow-xs active:scale-95">Panitia Sembilan</div>
+                                <div onclick="selectTokohCard('PPKI')" class="p-3 bg-white border border-red-200 rounded-xl text-xs font-bold text-center cursor-pointer shadow-xs active:scale-95">PPKI</div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <h4 class="font-black text-[11px] text-red-900 text-center">PERAN UTAMA</h4>
+                                <div onclick="matchPeranCard('PPKI')" class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[10px] font-bold text-center cursor-pointer shadow-xs active:scale-95">Mengesahkan UUD NRI 1945</div>
+                                <div onclick="matchPeranCard('BPUPK')" class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[10px] font-bold text-center cursor-pointer shadow-xs active:scale-95">Merumuskan Dasar & UUD</div>
+                                <div onclick="matchPeranCard('PANITIA9')" class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[10px] font-bold text-center cursor-pointer shadow-xs active:scale-95">Menyusun Piagam Jakarta</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                body.innerHTML = html;
+            });
+        }
+
+        function selectTokohCard(id) {
+            selectedPairTokoh = id;
+            AudioEngine.playClick();
+            showCustomAlert("KARTU DIPILIH", `Kartu <b>${id}</b> telah dipilih. Sekarang pilih kartu Peran pasangan di sebelah kanan!`, "🧩");
+        }
+
+        function matchPeranCard(id) {
+            if (!selectedPairTokoh) {
+                showCustomAlert("PERHATIAN", "Pilih kartu Tokoh di sebelah kiri terlebih dahulu!", "⚠️");
+                return;
+            }
+            if (selectedPairTokoh === id) {
+                addXP(20);
+                showCustomAlert("PASANGAN COCOK!", "🎉 Luar biasa! Pasangan Tokoh dan Peran berhasil dirangkai! (+20 XP)", "🧩", closeGameModal);
+            } else {
+                AudioEngine.playWrong();
+                showCustomAlert("BELUM COCOK", "❌ Pasangan tidak cocok. Silakan coba kombinasi lain!", "💡");
+            }
+            selectedPairTokoh = null;
+        }
+
+        // 5. RODA KEBERUNTUNGAN (CANVAS WHEEL)
+        function runRodaGame(levelId) {
+            openGameModal("🎡 RODA KEBERUNTUNGAN", (body) => {
+                let html = `
+                    <div class="text-center space-y-3 my-auto flex flex-col items-center">
+                        <canvas id="wheel-canvas" width="220" height="220" class="mx-auto rounded-full shadow-lg border-4 border-amber-400"></canvas>
+                        <button onclick="spinCanvasWheel()" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-black text-xs rounded-full shadow-lg active:scale-95 transition">
+                            🎯 PUTAR RODA!
+                        </button>
+                    </div>
+                `;
+                body.innerHTML = html;
+                drawCanvasWheel();
+            });
+        }
+
+        function drawCanvasWheel() {
+            const canvas = document.getElementById('wheel-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const colors = ['#dc2626', '#f59e0b', '#2563eb', '#059669', '#7c3aed', '#db2777'];
+            const labels = ['BPUPK', 'PPKI', 'UUD 45', 'NORMA', 'PASAL', 'HAK'];
+            
+            ctx.clearRect(0, 0, 220, 220);
+            for (let i = 0; i < 6; i++) {
+                ctx.beginPath();
+                ctx.fillStyle = colors[i];
+                ctx.moveTo(110, 110);
+                ctx.arc(110, 110, 100, (i * 60 * Math.PI) / 180, ((i + 1) * 60 * Math.PI) / 180);
+                ctx.fill();
+
+                ctx.save();
+                ctx.translate(110, 110);
+                ctx.rotate(((i * 60 + 30) * Math.PI) / 180);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 11px Poppins';
+                ctx.fillText(labels[i], 45, 4);
+                ctx.restore();
+            }
+        }
+
+        function spinCanvasWheel() {
+            AudioEngine.playDice();
+            const canvas = document.getElementById('wheel-canvas');
+            if (canvas) canvas.style.transform = 'rotate(1080deg)';
+            
+            setTimeout(() => {
+                const q = getQuestionWithOptions();
+                let optionsHtml = '';
+                q.pilihan.forEach((p, idx) => {
+                    optionsHtml += `<button onclick="submitWheelAnswer(${idx}, ${q.jawaban})" class="w-full text-left p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold my-1">${p}</button>`;
+                });
+                showCustomAlert("KATEGORI DITERIMA", `<p class="text-xs font-bold text-slate-800 mb-2">${q.soal}</p>${optionsHtml}`, "🎡");
+            }, 800);
+        }
+
+        function submitWheelAnswer(chosen, correct) {
+            if (chosen === correct) {
+                addXP(25);
+                showCustomAlert("BENAR!", "🎉 Selamat! Kamu menjawab tantangan Roda dengan sempurna! (+25 XP)", "🎡", closeGameModal);
+            } else {
+                AudioEngine.playWrong();
+                showCustomAlert("BELUM TEPAT", "❌ Jawaban belum tepat!", "💡");
+            }
+        }
+
+        // 6. MESIN WAKTU SEJARAH (TIMELINE)
+        function runTimelineGame(levelId) {
+            openGameModal("⏳ MESIN WAKTU SEJARAH", (body) => {
+                let html = `
+                    <div class="space-y-3 my-auto">
+                        <p class="text-xs text-center text-slate-600 font-medium">Urutkan kronologi perumusan UUD NRI 1945 secara tepat!</p>
+                        
+                        <div class="space-y-2">
+                            <div class="p-3 bg-white border border-red-200 rounded-xl text-xs font-bold text-slate-800 shadow-xs flex items-center justify-between">
+                                <span>1. Pembentukan BPUPK</span>
+                                <span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full">1 Maret 1945</span>
+                            </div>
+                            <div class="p-3 bg-white border border-red-200 rounded-xl text-xs font-bold text-slate-800 shadow-xs flex items-center justify-between">
+                                <span>2. Perumusan Piagam Jakarta</span>
+                                <span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full">22 Juni 1945</span>
+                            </div>
+                            <div class="p-3 bg-white border border-red-200 rounded-xl text-xs font-bold text-slate-800 shadow-xs flex items-center justify-between">
+                                <span>3. Pengesahan UUD oleh PPKI</span>
+                                <span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full">18 Agustus 1945</span>
+                            </div>
+                        </div>
+
+                        <button onclick="checkTimelineCorrect()" class="w-full py-2.5 bg-red-600 text-white font-bold text-xs rounded-xl shadow active:scale-95 transition">
+                            Konfirmasi Urutan Kronologis
+                        </button>
+                    </div>
+                `;
+                body.innerHTML = html;
+            });
+        }
+
+        function checkTimelineCorrect() {
+            addXP(20);
+            showCustomAlert("KRONOLOGI TEPAT!", "🎉 Hebat! Kamu menguasai rangkaian garis waktu sejarah pembentukan UUD 1945! (+20 XP)", "⏳", closeGameModal);
+        }
+
+        // 7. BENAR ATAU SALAH
+        function runBenarSalahGame(levelId) {
+            const bsList = BANK_SOAL.filter(q => q.jenis === 'BS');
+            const q = bsList.length > 0 ? bsList[Math.floor(Math.random() * bsList.length)] : BANK_SOAL[1];
+
+            openGameModal("⚡ BENAR ATAU SALAH", (body) => {
+                let html = `
+                    <div class="text-center space-y-4 my-auto">
+                        <div class="bg-red-50 p-4 rounded-2xl border border-red-200 shadow-sm">
+                            <p class="text-xs sm:text-sm font-extrabold text-slate-800 leading-relaxed font-serif">"${q.soal}"</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 max-w-xs mx-auto">
+                            <button onclick="checkBS(true, ${q.jawaban}, '${q.penjelasan.replace(/'/g, "\\'")}')" class="p-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow active:scale-95">
+                                BENAR
+                            </button>
+                            <button onclick="checkBS(false, ${q.jawaban}, '${q.penjelasan.replace(/'/g, "\\'")}')" class="p-3.5 bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl shadow active:scale-95">
+                                SALAH
+                            </button>
+                        </div>
+                    </div>
+                `;
+                body.innerHTML = html;
+            });
+        }
+
+        function checkBS(userAns, correctAns, explanation) {
+            if (userAns === correctAns) {
+                addXP(15);
+                showCustomAlert("TEPAT!", `🎉 Analisis Tepat! (+15 XP)<br><br><span class="text-slate-600">${explanation}</span>`, "⚡", closeGameModal);
+            } else {
+                AudioEngine.playWrong();
+                showCustomAlert("BELUM TEPAT", `💡 Penjelasan:<br><br><span class="text-slate-600">${explanation}</span>`, "💡");
+            }
+        }
+
+        // 8. BATTLE QUIZ (1 VS 1 AI BOT)
+        let playerHP = 100;
+        let botHP = 100;
+        function runBattleQuizGame(levelId) {
+            playerHP = 100;
+            botHP = 100;
+            openGameModal("⚔️ BATTLE QUIZ (VS AI BOT)", (body) => {
+                renderBattleScreen(body);
+            });
+        }
+
+        function renderBattleScreen(body) {
+            const q = getQuestionWithOptions();
+            let html = `
+                <div class="space-y-3 my-auto">
+                    <!-- Health Bars -->
+                    <div class="grid grid-cols-2 gap-3 bg-slate-800 p-3 rounded-2xl text-white">
+                        <div>
+                            <p class="text-[10px] font-bold text-amber-300">🧍 Kamu (HP: ${playerHP})</p>
+                            <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden mt-1">
+                                <div class="bg-emerald-500 h-full" style="width: ${playerHP}%"></div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-bold text-red-300">🤖 AI Musuh (HP: ${botHP})</p>
+                            <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden mt-1">
+                                <div class="bg-red-500 h-full ml-auto" style="width: ${botHP}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-3 rounded-xl border border-slate-200">
+                        <p class="text-xs font-bold text-slate-800">${q.soal}</p>
+                    </div>
+
+                    <div class="space-y-1.5">
+            `;
+
+            q.pilihan.forEach((p, idx) => {
+                html += `
+                    <button onclick="submitBattleAnswer(${idx}, ${q.jawaban})" class="w-full text-left p-2.5 bg-white border border-slate-200 hover:bg-red-50 rounded-xl text-xs font-semibold">
+                        ${p}
+                    </button>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+            body.innerHTML = html;
+        }
+
+        function submitBattleAnswer(chosen, correct) {
+            if (chosen === correct) {
+                botHP -= 35;
+                if (botHP <= 0) {
+                    botHP = 0;
+                    addXP(40);
+                    showCustomAlert("VICTORY!", "⚔️ KAMU MENANG DUEL BATTLE! AI musuh telah dikalahkan! (+40 XP)", "🏆", closeGameModal);
+                    return;
+                }
+                AudioEngine.playCorrect();
+                showCustomAlert("SERANGAN BERHASIL!", "⚔️ Jawaban Benar! Kamu memberikan 35 Damage pada AI!", "💥", () => {
+                    const body = document.getElementById('game-modal-body');
+                    renderBattleScreen(body);
+                });
+            } else {
+                playerHP -= 25;
+                AudioEngine.playWrong();
+                if (playerHP <= 0) {
+                    playerHP = 0;
+                    showCustomAlert("DEFEAT", "❌ HP Kamu habis! Terus berlatih untuk mengalahkan AI!", "💀", closeGameModal);
+                    return;
+                }
+                showCustomAlert("SERANGAN AI!", "❌ Jawaban Salah! AI membalas dan memberikan 25 Damage padamu!", "🛡️", () => {
+                    const body = document.getElementById('game-modal-body');
+                    renderBattleScreen(body);
+                });
+            }
+        }
+
+        // 9-15. OTHER MINI GAMES
+        function runKuisCepatGame() { runDetektifGame(1); }
+        function runMemoryGame() { runPasangkanGame(1); }
+        function runTTSGame() { runDetektifGame(2); }
+        function runMonopoliGame() { runUlarTanggaGame(2); }
+        function runSimulasiGame() { runDetektifGame(6); }
+        function runTebakGambarGame() { runTebakTokohGame(1); }
+        function runJelajahPasalGame() { runDetektifGame(5); }
+
+        // 16. FINAL MISSION & CERTIFICATE GENERATOR
+        function runFinalMissionGame(levelId) {
+            openGameModal("🏆 FINAL MISSION: CERTIFICATE EXAM", (body) => {
+                let html = `
+                    <div class="text-center space-y-3 my-auto py-2">
+                        <div class="text-5xl">🏆</div>
+                        <h3 class="text-base font-black text-red-900">Ujian Sertifikasi Konstitusi</h3>
+                        <p class="text-xs text-slate-600 max-w-xs mx-auto">Selesaikan Ujian Akhir untuk mencetak Sertifikat Warga Negara Konstitusional Sejati!</p>
+
+                        <button onclick="generateCertificateView()" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl shadow active:scale-95 transition mt-2">
+                            🎓 Ambil Sertifikat Prestasi
+                        </button>
+                    </div>
+                `;
+                body.innerHTML = html;
+            });
+        }
+
+        function generateCertificateView() {
+            const dateStr = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+            openGameModal("🎓 SERTIFIKAT PRESTASI DIGITAL", (body) => {
+                let html = `
+                    <div class="space-y-4 text-center">
+                        <div id="certificate-print-area" class="border-4 border-amber-500 p-4 rounded-2xl bg-gradient-to-b from-amber-50 to-white shadow-md text-slate-900 space-y-2">
+                            <span class="text-3xl">🇮🇩</span>
+                            <h2 class="font-black text-sm uppercase tracking-widest text-red-900">SERTIFIKAT PRESTASI</h2>
+                            <p class="text-[10px] text-slate-500 font-medium">Diberikan secara resmi kepada:</p>
+                            <h3 class="font-black text-base text-red-700 underline decoration-amber-400 decoration-2">${AppState.player.name}</h3>
+                            <p class="text-[10px] text-slate-600">Atas keberhasilan menuntaskan seluruh tantangan pembelajaran dan menguasai norma UUD NRI Tahun 1945 dengan total <b>${AppState.player.xp} XP</b>.</p>
+                            <div class="pt-2 flex justify-between items-center text-[9px] text-slate-500 border-t border-amber-200">
+                                <span>Room: <b class="font-mono">${AppState.player.roomCode}</b></span>
+                                <span>Tanggal: ${dateStr}</span>
+                            </div>
+                        </div>
+
+                        <button onclick="window.print()" class="w-full py-2.5 bg-slate-900 text-white font-bold text-xs rounded-xl shadow">
+                            🖨️ Cetak / Simpan PDF Sertifikat
+                        </button>
+                    </div>
+                `;
+                body.innerHTML = html;
+            });
+        }
+
+        function launchReflectionModal(levelId) {
+            openGameModal(`📝 REFLEKSI LEVEL ${levelId}`, (body) => {
+                let html = `
+                    <div class="space-y-3 my-auto">
+                        <div class="bg-red-50 p-3 rounded-xl border border-red-200">
+                            <h4 class="font-bold text-xs text-red-900">Jurnal Refleksi Mandiri</h4>
+                            <p class="text-xs text-slate-600">Tuliskan pemahamanmu di level ini:</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">1. Hal paling berharga yang kamu pelajari?</label>
+                            <textarea id="refl-1" rows="2" class="w-full border border-slate-300 rounded-xl p-2 text-xs focus:outline-none focus:border-red-500" placeholder="Tuliskan di sini..."></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">2. Komitmen ketaatan aturan di kehidupan nyata?</label>
+                            <textarea id="refl-2" rows="2" class="w-full border border-slate-300 rounded-xl p-2 text-xs focus:outline-none focus:border-red-500" placeholder="Tuliskan di sini..."></textarea>
+                        </div>
+
+                        <button onclick="saveReflection(${levelId})" class="w-full py-2.5 bg-red-600 text-white font-bold text-xs rounded-xl shadow">
+                            Simpan Jurnal Refleksi
+                        </button>
+                    </div>
+                `;
+                body.innerHTML = html;
+            });
+        }
+
+        function saveReflection(levelId) {
+            const r1 = document.getElementById('refl-1').value;
+            const r2 = document.getElementById('refl-2').value;
+
+            if (r1 && r2) {
+                AppState.player.reflections[levelId] = { r1, r2, date: new Date().toLocaleDateString('id-ID') };
+                addXP(25);
+                saveState();
+                showCustomAlert("JURNAL DISIMPAN", "🎉 Jurnal Refleksi berhasil dicatat! (+25 XP)", "📝", closeGameModal);
+            } else {
+                showCustomAlert("PERHATIAN", "Mohon isi kedua pertanyaan refleksi terlebih dahulu!", "⚠️");
+            }
+        }
+
+        function showReflectionsSummary() {
+            openGameModal("📝 JURNAL REFLEKSI SAYA", (body) => {
+                let html = `<div class="space-y-2.5 text-xs">`;
+                const keys = Object.keys(AppState.player.reflections);
+                if (keys.length === 0) {
+                    html += `<p class="text-slate-500 text-center py-4">Belum ada refleksi yang diisi. Selesaikan level di Peta untuk mengisi refleksi!</p>`;
+                } else {
+                    keys.forEach(k => {
+                        const r = AppState.player.reflections[k];
+                        html += `
+                            <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+                                <h4 class="font-bold text-amber-900">Refleksi Level ${k} (${r.date})</h4>
+                                <p class="text-slate-700 mt-1"><b>Pelajaran:</b> ${r.r1}</p>
+                                <p class="text-slate-700 mt-0.5"><b>Komitmen:</b> ${r.r2}</p>
+                            </div>
+                        `;
+                    });
+                }
+                html += `</div>`;
+                body.innerHTML = html;
+            });
+        }
+
+        // INITIAL APP STARTUP
+        document.addEventListener('DOMContentLoaded', () => {
+            updateHeader();
+            switchTab('map');
+        });
+    </script>
+</body>
+</html>
